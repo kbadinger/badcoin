@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <exception>
+#include <list>
 #include <map>
 #include <memory>
 #include <set>
