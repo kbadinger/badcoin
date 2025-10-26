@@ -68,6 +68,60 @@ brew install boost libevent berkeley-db@4 openssl
 - Missing #include <list> in validation.h (fixed)
 - Missing Boost includes in consensus library (added BOOST_CPPFLAGS to libbitcoinconsensus)
 
+## Running Badcoin Node
+
+### Critical Runtime Flags (REQUIRED for Stability)
+
+**Start daemon for mining:**
+```bash
+./src/badcoind \
+  -datadir=/path/to/badcoin-data \
+  -maxtipage=120000000 \
+  -algo=yescrypt \
+  -noonion \
+  -daemon
+```
+
+**Critical flags explained:**
+- `-maxtipage=120000000` - Accept blockchain with old timestamps (REQUIRED for historical data)
+- `-algo=yescrypt` - Use easiest CPU mining algorithm (alternatives: skein, scrypt, groestl, sha256d)
+- `-noonion` - **CRITICAL:** Disables TOR controller which causes random shutdowns
+
+### Mining Commands
+
+**Mine blocks:**
+```bash
+./src/badcoin-cli \
+  -datadir=/path/to/badcoin-data \
+  -rpcclienttimeout=1800 \
+  generatetoaddress 10 "YOUR_ADDRESS"
+```
+
+**Important notes:**
+- RPC timeout errors are normal (mining takes 2-10 min/block)
+- Daemon continues mining even after client timeout
+- Monitor progress: `./src/badcoin-cli getblockcount`
+- Watch Terminal 1 for `UpdateTip` messages showing blocks found
+- Average mining time on M1/M2: 2-5 minutes per block with yescrypt
+
+### Common Runtime Issues
+
+**TOR Thread Shutdowns:**
+- Symptom: Daemon randomly shuts down with "tor: Thread interrupt"
+- Fix: Always use `-noonion` flag
+- Never run without this flag on macOS
+
+**Initial Block Download Lock:**
+- Symptom: `generatetoaddress` returns empty array `[]`
+- Cause: Node thinks it's still syncing if last block >24 hours old
+- Fix: Use `-maxtipage=120000000` flag
+
+**Block Corruption:**
+- If reindexing fails with "ReadBlockFromDisk" errors
+- Corruption in historical data doesn't affect forward mining
+- Can still mine new blocks on top of corrupted chain
+- Never use `-reindex` or `-reindex-chainstate` if corruption exists
+
 ### Common Configure Options (x86_64/Linux)
 
 ```bash
