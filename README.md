@@ -96,6 +96,44 @@ make -j$(nproc)
 ./src/badcoin-cli stop
 ```
 
+### GUI Wallet (macOS Only)
+
+**Additional dependencies for GUI:**
+```bash
+brew install qt@5 qrencode
+brew unlink protobuf
+brew install protobuf@21
+```
+
+**Build with GUI:**
+```bash
+export PKG_CONFIG_PATH="/opt/homebrew/opt/libevent/lib/pkgconfig:/opt/homebrew/opt/qt@5/lib/pkgconfig:/opt/homebrew/opt/protobuf@21/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PATH="/opt/homebrew/opt/qt@5/bin:/opt/homebrew/opt/protobuf@21/bin:$PATH"
+
+arch -arm64 ./configure \
+  --with-gui=qt5 \
+  --with-boost=/opt/homebrew/opt/boost \
+  --host=aarch64-apple-darwin \
+  --enable-asm=no \
+  --disable-tests \
+  --disable-bench \
+  CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/opt/homebrew/opt/protobuf@21/include" \
+  LDFLAGS="-L/opt/homebrew/opt/protobuf@21/lib"
+
+arch -arm64 make -j$(sysctl -n hw.ncpu)
+```
+
+**Launch GUI wallet:**
+```bash
+./src/qt/badcoin-qt -datadir=/path/to/data -maxtipage=120000000 -noonion &
+```
+
+**Mining via GUI:**
+- Go to: Help → Debug window → Console tab
+- Type: `generatetoaddress 10 "YOUR_ADDRESS"`
+
+**Note:** GUI wallet includes badcoind, so don't run both simultaneously.
+
 ## Important Notes
 
 ### Consensus Bug Fix (Nov 2025)
