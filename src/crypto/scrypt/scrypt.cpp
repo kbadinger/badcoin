@@ -44,8 +44,8 @@
 #endif
 #endif
 
-// Define endian functions ONLY for macOS - other platforms have them in system headers
-#if defined(__APPLE__) || defined(MAC_OSX)
+// Define portable endian functions with guards to avoid conflicts
+// Modern macOS and Windows MSYS2 need these
 #ifndef be32dec
 static inline uint32_t be32dec(const void *pp)
 {
@@ -85,7 +85,6 @@ static inline void le32enc(void *pp, uint32_t x)
 	p[3] = (x >> 24) & 0xff;
 }
 #endif
-#endif // __APPLE__ || MAC_OSX
 
 typedef struct HMAC_SHA256Context {
 	SHA256_CTX ictx;
