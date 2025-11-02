@@ -1,0 +1,195 @@
+name: Build Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          choco install -y python3 wget
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-openssl
+            mingw-w64-x86_64-libevent
+            mingw-w64-x86_64-db
+            mingw-w64-x86_64-qt5
+            mingw-w64-x86_64-protobuf
+            autoconf
+            automake
+            libtool
+            pkg-config
+
+      - name: Build Badcoin
+        shell: msys2 {0}
+        run: |
+          ./autogen.sh
+          ./configure \
+            --with-gui=qt5 \
+            --disable-tests \
+            --disable-bench \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS" \
+            CXXFLAGS="-O2" \
+            --prefix=/mingw64
+          make -j4
+
+      - name: Package binaries
+        shell: msys2 {0}
+        run: |
+          mkdir -p release
+          cp src/badcoind.exe release/ || true
+          cp src/badcoin-cli.exe release/ || true
+          cp src/badcoin-tx.exe release/ || true
+          cp src/qt/badcoin-qt.exe release/ || true
+
+          # Copy required DLLs
+          ldd release/badcoin-qt.exe | grep mingw | awk '{print $3}' | xargs -I {} cp {} release/ || true
+
+      - name: Create README for Windows users
+        run: |
+          echo "# Badcoin for Windows" > release/README.txt
+          echo "" >> release/README.txt
+          echo "## Quick Start" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "1. Double-click badcoin-qt.exe to start the GUI wallet" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "2. Wait for the wallet to sync (may take a few hours first time)" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "3. Go to Receive tab to get your address" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "4. To mine: Help → Debug Console → Type:" >> release/README.txt
+          echo "   generatetoaddress 10 \"YOUR_ADDRESS\"" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "## IMPORTANT FLAGS" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "If you use command line, always start with:" >> release/README.txt
+          echo "badcoind.exe -maxtipage=120000000 -algo=yescrypt -noonion" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "## Support" >> release/README.txt
+          echo "GitHub: https://github.com/kbadinger/badcoin" >> release/README.txt
+          echo "Telegram: Bad Crypto community" >> release/README.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: badcoin-windows
+          path: release/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install boost libevent berkeley-db@4 openssl autoconf automake libtool qt@5 qrencode protobuf@21
+
+      - name: Build Badcoin
+        run: |
+          ./autogen.sh
+
+          export PKG_CONFIG_PATH="/opt/homebrew/opt/libevent/lib/pkgconfig:/opt/homebrew/opt/qt@5/lib/pkgconfig:/opt/homebrew/opt/protobuf@21/lib/pkgconfig:$PKG_CONFIG_PATH"
+          export PATH="/opt/homebrew/opt/qt@5/bin:/opt/homebrew/opt/protobuf@21/bin:$PATH"
+
+          ./configure \
+            --with-gui=qt5 \
+            --with-boost=/opt/homebrew/opt/boost \
+            --disable-tests \
+            --disable-bench \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/opt/homebrew/opt/protobuf@21/include" \
+            LDFLAGS="-L/opt/homebrew/opt/protobuf@21/lib"
+
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: Package binaries
+        run: |
+          mkdir -p release
+          cp src/badcoind release/ || true
+          cp src/badcoin-cli release/ || true
+          cp src/badcoin-tx release/ || true
+          cp src/qt/badcoin-qt release/ || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: badcoin-macos
+          path: release/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential libtool autotools-dev automake autoconf \
+            pkg-config libssl-dev libevent-dev bsdmainutils \
+            libboost-system-dev libboost-filesystem-dev \
+            libboost-program-options-dev libboost-thread-dev \
+            libboost-chrono-dev libdb5.3-dev libdb5.3++-dev
+
+      - name: Build Badcoin
+        run: |
+          ./autogen.sh
+          ./configure \
+            --without-gui \
+            --disable-tests \
+            --disable-bench \
+            --with-incompatible-bdb \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS"
+          make -j$(nproc)
+
+      - name: Package binaries
+        run: |
+          mkdir -p release
+          cp src/badcoind release/
+          cp src/badcoin-cli release/
+          cp src/badcoin-tx release/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: badcoin-linux
+          path: release/
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create release archives
+        run: |
+          cd badcoin-windows && zip -r ../badcoin-windows.zip . && cd ..
+          cd badcoin-macos && zip -r ../badcoin-macos.zip . && cd ..
+          cd badcoin-linux && tar czf ../badcoin-linux.tar.gz . && cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            badcoin-windows.zip
+            badcoin-macos.zip
+            badcoin-linux.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
