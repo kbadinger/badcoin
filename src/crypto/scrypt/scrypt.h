@@ -2,9 +2,10 @@
 #define SCRYPT_H
 #include <stdlib.h>
 #include <stdint.h>
-#if defined(__APPLE__) || defined(MAC_OSX)
-#include <sys/endian.h>
-#endif
+// macOS doesn't need explicit endian include - functions are in stdlib
+// #if defined(__APPLE__) || defined(MAC_OSX)
+// #include <sys/endian.h>
+// #endif
 
 static const int SCRYPT_SCRATCHPAD_SIZE = 131072 + 63;
 
