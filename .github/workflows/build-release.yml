@@ -44,8 +44,11 @@ jobs:
             --disable-tests \
             --disable-bench \
             --with-incompatible-bdb \
-            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS" \
+            --with-boost=/mingw64 \
+            BOOST_LDFLAGS="-L/mingw64/lib" \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include" \
             CXXFLAGS="-O2" \
+            LDFLAGS="-L/mingw64/lib" \
             --prefix=/mingw64
           make -j4
 
