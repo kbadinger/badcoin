@@ -43,6 +43,7 @@ jobs:
             --with-gui=qt5 \
             --disable-tests \
             --disable-bench \
+            --with-incompatible-bdb \
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS" \
             CXXFLAGS="-O2" \
             --prefix=/mingw64
@@ -125,7 +126,7 @@ jobs:
           cp src/qt/badcoin-qt release/ || true
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: badcoin-macos
           path: release/
@@ -164,7 +165,7 @@ jobs:
           cp src/badcoin-tx release/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: badcoin-linux
           path: release/
