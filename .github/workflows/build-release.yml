@@ -40,7 +40,7 @@ jobs:
         run: |
           ./autogen.sh
           ./configure \
-            --with-gui=qt5 \
+            --without-gui \
             --disable-tests \
             --disable-bench \
             --with-incompatible-bdb \
