@@ -115,8 +115,8 @@ jobs:
             --with-boost=/opt/homebrew/opt/boost \
             --disable-tests \
             --disable-bench \
-            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/opt/homebrew/opt/protobuf@21/include" \
-            LDFLAGS="-L/opt/homebrew/opt/protobuf@21/lib"
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/opt/homebrew/opt/protobuf@21/include -I/opt/homebrew/opt/openssl@3/include" \
+            LDFLAGS="-L/opt/homebrew/opt/protobuf@21/lib -L/opt/homebrew/opt/openssl@3/lib"
 
           make -j$(sysctl -n hw.ncpu)
 
