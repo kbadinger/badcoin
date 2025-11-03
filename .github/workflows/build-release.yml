@@ -75,25 +75,44 @@ jobs:
         run: |
           echo "# Badcoin for Windows" > release/README.txt
           echo "" >> release/README.txt
-          echo "## Quick Start" >> release/README.txt
+          echo "## Quick Start (Command Line)" >> release/README.txt
           echo "" >> release/README.txt
-          echo "1. Double-click badcoin-qt.exe to start the GUI wallet" >> release/README.txt
+          echo "1. Open Command Prompt in this directory" >> release/README.txt
           echo "" >> release/README.txt
-          echo "2. Wait for the wallet to sync (may take a few hours first time)" >> release/README.txt
+          echo "2. Start the Badcoin daemon (will run in foreground):" >> release/README.txt
+          echo "   badcoind.exe -maxtipage=120000000 -algo=yescrypt -noonion -printtoconsole" >> release/README.txt
           echo "" >> release/README.txt
-          echo "3. Go to Receive tab to get your address" >> release/README.txt
+          echo "   NOTE: Keep this window open! On Windows, badcoind runs in the foreground." >> release/README.txt
+          echo "   The -daemon flag does NOT work on Windows." >> release/README.txt
           echo "" >> release/README.txt
-          echo "4. To mine: Help → Debug Console → Type:" >> release/README.txt
-          echo "   generatetoaddress 10 \"YOUR_ADDRESS\"" >> release/README.txt
+          echo "3. Open a SECOND Command Prompt to interact with the node:" >> release/README.txt
+          echo "   badcoin-cli.exe getblockchaininfo" >> release/README.txt
           echo "" >> release/README.txt
-          echo "## IMPORTANT FLAGS" >> release/README.txt
+          echo "4. Get your wallet address:" >> release/README.txt
+          echo "   badcoin-cli.exe getnewaddress" >> release/README.txt
           echo "" >> release/README.txt
-          echo "If you use command line, always start with:" >> release/README.txt
-          echo "badcoind.exe -maxtipage=120000000 -algo=yescrypt -noonion" >> release/README.txt
+          echo "5. Mine blocks (replace YOUR_ADDRESS with address from step 4):" >> release/README.txt
+          echo "   badcoin-cli.exe -rpcclienttimeout=1800 generatetoaddress 10 \"YOUR_ADDRESS\"" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "   NOTE: Mining takes 2-10 minutes per block. RPC timeout is normal." >> release/README.txt
+          echo "   The daemon keeps mining even if the CLI times out." >> release/README.txt
+          echo "" >> release/README.txt
+          echo "## CRITICAL FLAGS (Always Required)" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "-maxtipage=120000000  # Accept old blockchain data" >> release/README.txt
+          echo "-algo=yescrypt        # Easiest mining algorithm for CPU" >> release/README.txt
+          echo "-noonion              # REQUIRED: Prevents random shutdowns on Windows" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "## Alternative: Run in Background" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "To run in background (no console output):" >> release/README.txt
+          echo "   start /B badcoind.exe -maxtipage=120000000 -algo=yescrypt -noonion" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "Check debug.log in %APPDATA%\\Badcoin\\ for output." >> release/README.txt
           echo "" >> release/README.txt
           echo "## Support" >> release/README.txt
+          echo "" >> release/README.txt
           echo "GitHub: https://github.com/kbadinger/badcoin" >> release/README.txt
-          echo "Telegram: Bad Crypto community" >> release/README.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
