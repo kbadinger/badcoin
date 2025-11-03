@@ -56,13 +56,20 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir -p release
-          cp src/badcoind.exe release/ || true
-          cp src/badcoin-cli.exe release/ || true
-          cp src/badcoin-tx.exe release/ || true
-          cp src/qt/badcoin-qt.exe release/ || true
+          cp src/badcoind.exe release/
+          cp src/badcoin-cli.exe release/
+          cp src/badcoin-tx.exe release/
 
-          # Copy required DLLs
-          ldd release/badcoin-qt.exe | grep mingw | awk '{print $3}' | xargs -I {} cp {} release/ || true
+          # Copy required DLLs from all executables
+          for exe in release/*.exe; do
+            if [ -f "$exe" ]; then
+              ldd "$exe" | grep mingw | awk '{print $3}' | xargs -I {} cp -n {} release/ 2>/dev/null || true
+            fi
+          done
+
+          # Explicitly copy Berkeley DB DLLs if they exist
+          cp /mingw64/bin/libdb-*.dll release/ 2>/dev/null || true
+          cp /mingw64/bin/libdb_cxx-*.dll release/ 2>/dev/null || true
 
       - name: Create README for Windows users
         run: |
