@@ -105,6 +105,8 @@ apt-get install -y \
   libbz2-dev \
   liblz4-dev \
   libzstd-dev \
+  librocksdb-dev \
+  nginx \
   graphviz
 
 # Install Go if not present or wrong version
