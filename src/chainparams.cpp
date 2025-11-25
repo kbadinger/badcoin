@@ -153,12 +153,10 @@ public:
 
         bech32_hrp = "bad";
 
-        vSeeds.push_back("165.227.13.253:9011");
-        vSeeds.push_back("165.227.13.253:9012");
-        vSeeds.push_back("165.227.13.253:9013");
-        vSeeds.push_back("165.227.13.253:9014");
-        vSeeds.push_back("165.227.13.253:9015");
-        vSeeds.push_back("157.230.56.219");
+        // BadCoin Revival Seed Nodes (November 2025)
+        vSeeds.push_back("161.35.221.92:9012");
+        vSeeds.push_back("64.23.211.107:9012");
+        vSeeds.push_back("161.35.181.192:9012");
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
