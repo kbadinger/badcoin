@@ -21,14 +21,14 @@ Badcoin is a Bitcoin Core fork implementing auxiliary proof-of-work (auxpow) mer
 brew install boost libevent berkeley-db@4 openssl autoconf automake libtool
 ```
 
-**Linux / Raspberry Pi:**
+**Linux (Ubuntu/Debian):**
 ```bash
 sudo apt-get install -y \
   build-essential libtool autotools-dev automake autoconf \
   pkg-config libssl-dev libevent-dev bsdmainutils git \
   libboost-system-dev libboost-filesystem-dev \
   libboost-program-options-dev libboost-thread-dev \
-  libboost-chrono-dev libdb5.3-dev libdb5.3++-dev
+  libboost-chrono-dev libdb-dev libdb++-dev
 ```
 
 ### Building
@@ -51,7 +51,21 @@ arch -arm64 ./configure \
 arch -arm64 make -j$(sysctl -n hw.ncpu)
 ```
 
-**Linux / Raspberry Pi:**
+**Linux (x86_64 servers like Hetzner, DigitalOcean, etc.):**
+```bash
+./autogen.sh
+
+./configure \
+  --without-gui \
+  --disable-tests \
+  --disable-bench \
+  --with-incompatible-bdb \
+  CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS"
+
+make -j$(nproc)
+```
+
+**Linux (Raspberry Pi / ARM64):**
 ```bash
 ./autogen.sh
 
@@ -65,6 +79,8 @@ arch -arm64 make -j$(sysctl -n hw.ncpu)
 
 make -j$(nproc)
 ```
+
+⚠️ **IMPORTANT:** Do NOT use `--disable-wallet` or you won't be able to mine!
 
 ### Running
 
@@ -89,6 +105,33 @@ make -j$(nproc)
 
 # Mine blocks (replace ADDRESS with yours)
 ./src/badcoin-cli -rpcclienttimeout=1800 generatetoaddress 10 "ADDRESS"
+```
+
+**Mining on remote servers (persist after SSH disconnect):**
+```bash
+# Option 1: Use screen
+screen -S mining
+./src/badcoin-cli -rpcclienttimeout=1800 generatetoaddress 1000 "YOUR_ADDRESS"
+# Press Ctrl+A, then D to detach
+# Reconnect later: screen -r mining
+
+# Option 2: Use tmux
+tmux new -s mining
+./src/badcoin-cli -rpcclienttimeout=1800 generatetoaddress 1000 "YOUR_ADDRESS"
+# Press Ctrl+B, then D to detach
+# Reconnect later: tmux attach -t mining
+```
+
+**Monitoring:**
+```bash
+# Check current block height
+./src/badcoin-cli getblockcount
+
+# Check wallet balance
+./src/badcoin-cli getbalance
+
+# Check blockchain sync status
+./src/badcoin-cli getblockchaininfo
 ```
 
 **Stop the daemon:**
@@ -139,6 +182,32 @@ arch -arm64 make -j$(sysctl -n hw.ncpu)
 ### Consensus Bug Fix (Nov 2025)
 
 This codebase includes a critical fix for floating-point arithmetic in block reward calculation that caused non-deterministic validation across different systems. Blocks before height 1,400,000 use lenient validation; future blocks enforce strict consensus.
+
+### Troubleshooting
+
+**"Method not found" error on createwallet:**
+- This version doesn't have `createwallet` - the wallet is created automatically
+- Just use `./src/badcoin-cli getnewaddress` directly
+
+**"Method not found" error on getnewaddress:**
+- Wallet support wasn't compiled in
+- Rebuild WITHOUT `--disable-wallet` flag
+- Make sure to include `--with-incompatible-bdb`
+
+**generatetoaddress returns empty array `[]`:**
+- Node thinks it's still syncing
+- Restart daemon with `-maxtipage=120000000` flag
+- Or add `maxtipage=120000000` to your badcoin.conf
+
+**libdb_cxx headers missing:**
+```bash
+sudo apt-get install libdb-dev libdb++-dev
+# or
+sudo apt-get install libdb5.3-dev libdb5.3++-dev
+```
+
+**Found Berkeley DB other than 4.8:**
+- Add `--with-incompatible-bdb` to configure command
 
 ### Known Issues
 
