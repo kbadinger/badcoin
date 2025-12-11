@@ -130,7 +130,7 @@ jobs:
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
             CXXFLAGS="-O2 -std=c++17" \
             LDFLAGS="-L/mingw64/lib" \
-            PROTOBUF_LIBS="$(pkg-config --libs protobuf 2>/dev/null || echo '-lprotobuf')" \
+            PROTOBUF_LIBS="-lprotobuf -labsl_log_internal_message -labsl_log_internal_check_op -labsl_log_internal_nullguard -labsl_log_internal_log_sink_set -labsl_log_sink -labsl_log_internal_globals -labsl_log_globals -labsl_log_internal_format -labsl_log_internal_proto -labsl_log_internal_conditions -labsl_log_entry -labsl_vlog_config_internal -labsl_log_severity -labsl_die_if_null -labsl_flags -labsl_flags_internal -labsl_flags_reflection -labsl_flags_config -labsl_flags_program_name -labsl_flags_marshalling -labsl_flags_commandlineflag -labsl_flags_commandlineflag_internal -labsl_flags_private_handle_accessor -labsl_raw_hash_set -labsl_hashtablez_sampler -labsl_exponential_biased -labsl_strings -labsl_strings_internal -labsl_string_view -labsl_base -labsl_spinlock_wait -labsl_int128 -labsl_throw_delegate -labsl_raw_logging_internal -labsl_strerror -labsl_symbolize -labsl_malloc_internal -labsl_time -labsl_time_zone -labsl_civil_time -labsl_stacktrace -labsl_debugging_internal -labsl_demangle_internal -labsl_synchronization -labsl_graphcycles_internal -labsl_kernel_timeout_internal -lws2_32 -lbcrypt" \
             --prefix=/mingw64
           make -j4
 
