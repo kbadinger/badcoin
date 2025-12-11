@@ -109,6 +109,7 @@ jobs:
             --with-gui=qt5 \
             --disable-tests \
             --disable-bench \
+            --disable-bip70 \
             --with-incompatible-bdb \
             --with-boost=/mingw64 \
             --with-qt-incdir=/mingw64/include \

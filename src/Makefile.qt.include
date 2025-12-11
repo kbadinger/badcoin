@@ -167,7 +167,6 @@ QT_MOC_CPP = \
   qt/moc_optionsmodel.cpp \
   qt/moc_overviewpage.cpp \
   qt/moc_peertablemodel.cpp \
-  qt/moc_paymentserver.cpp \
   qt/moc_qvalidatedlineedit.cpp \
   qt/moc_qvaluecombobox.cpp \
   qt/moc_receivecoinsdialog.cpp \
@@ -189,6 +188,10 @@ QT_MOC_CPP = \
   qt/moc_walletmodel.cpp \
   qt/moc_walletview.cpp
 
+if ENABLE_BIP70
+QT_MOC_CPP += qt/moc_paymentserver.cpp
+endif
+
 BITCOIN_MM = \
   qt/macdockiconhandler.mm \
   qt/macnotificationhandler.mm
@@ -206,9 +209,15 @@ QT_QRC = qt/bitcoin.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_bitcoin_locale.cpp
 QT_QRC_LOCALE = qt/bitcoin_locale.qrc
 
+if ENABLE_BIP70
 PROTOBUF_CC = qt/paymentrequest.pb.cc
 PROTOBUF_H = qt/paymentrequest.pb.h
 PROTOBUF_PROTO = qt/paymentrequest.proto
+else
+PROTOBUF_CC =
+PROTOBUF_H =
+PROTOBUF_PROTO =
+endif
 
 BITCOIN_QT_H = \
   qt/addressbookpage.h \
@@ -237,8 +246,6 @@ BITCOIN_QT_H = \
   qt/optionsdialog.h \
   qt/optionsmodel.h \
   qt/overviewpage.h \
-  qt/paymentrequestplus.h \
-  qt/paymentserver.h \
   qt/peertablemodel.h \
   qt/platformstyle.h \
   qt/qvalidatedlineedit.h \
@@ -264,6 +271,12 @@ BITCOIN_QT_H = \
   qt/walletmodeltransaction.h \
   qt/walletview.h \
   qt/winshutdownmonitor.h
+
+if ENABLE_BIP70
+BITCOIN_QT_H += \
+  qt/paymentrequestplus.h \
+  qt/paymentserver.h
+endif
 
 RES_ICONS = \
   qt/res/icons/add.png \
@@ -357,8 +370,6 @@ BITCOIN_QT_WALLET_CPP = \
   qt/editaddressdialog.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
-  qt/paymentrequestplus.cpp \
-  qt/paymentserver.cpp \
   qt/receivecoinsdialog.cpp \
   qt/receiverequestdialog.cpp \
   qt/recentrequeststablemodel.cpp \
@@ -382,6 +393,9 @@ BITCOIN_QT_CPP += $(BITCOIN_QT_WINDOWS_CPP)
 endif
 if ENABLE_WALLET
 BITCOIN_QT_CPP += $(BITCOIN_QT_WALLET_CPP)
+endif
+if ENABLE_BIP70
+BITCOIN_QT_CPP += qt/paymentrequestplus.cpp qt/paymentserver.cpp
 endif
 
 RES_IMAGES = 
@@ -411,10 +425,12 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 $(QT_MOC): $(QT_FORMS_H)
 $(qt_libbitcoinqt_a_OBJECTS) $(qt_badcoin_qt_OBJECTS) : | $(QT_MOC)
 
+if ENABLE_BIP70
 #Generating these with a half-written protobuf header leads to wacky results.
 #This makes sure it's done.
 $(QT_MOC): $(PROTOBUF_H)
 $(QT_MOC_CPP): $(PROTOBUF_H)
+endif
 
 # bitcoin-qt binary #
 qt_badcoin_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \

@@ -22,8 +22,10 @@
 #include <qt/winshutdownmonitor.h>
 
 #ifdef ENABLE_WALLET
-#include <qt/paymentserver.h>
 #include <qt/walletmodel.h>
+#if defined(ENABLE_BIP70)
+#include <qt/paymentserver.h>
+#endif
 #endif
 
 #include <init.h>
@@ -206,7 +208,7 @@ public:
     explicit BitcoinApplication(int &argc, char **argv);
     ~BitcoinApplication();
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     /// Create payment server
     void createPaymentServer();
 #endif
@@ -249,7 +251,9 @@ private:
     BitcoinGUI *window;
     QTimer *pollShutdownTimer;
 #ifdef ENABLE_WALLET
+#if defined(ENABLE_BIP70)
     PaymentServer* paymentServer;
+#endif
     WalletModel *walletModel;
 #endif
     int returnValue;
@@ -331,7 +335,9 @@ BitcoinApplication::BitcoinApplication(int &argc, char **argv):
     window(0),
     pollShutdownTimer(0),
 #ifdef ENABLE_WALLET
+#if defined(ENABLE_BIP70)
     paymentServer(0),
+#endif
     walletModel(0),
 #endif
     returnValue(0)
@@ -361,7 +367,7 @@ BitcoinApplication::~BitcoinApplication()
 
     delete window;
     window = 0;
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     delete paymentServer;
     paymentServer = 0;
 #endif
@@ -371,7 +377,7 @@ BitcoinApplication::~BitcoinApplication()
     platformStyle = 0;
 }
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
 void BitcoinApplication::createPaymentServer()
 {
     paymentServer = new PaymentServer(this);
@@ -471,7 +477,7 @@ void BitcoinApplication::initializeResult(bool success)
     {
         // Log this only after AppInitMain finishes, as then logging setup is guaranteed complete
         qWarning() << "Platform customization:" << platformStyle->getName();
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
         PaymentServer::LoadRootCAs();
         paymentServer->setOptionsModel(optionsModel);
 #endif
@@ -488,8 +494,10 @@ void BitcoinApplication::initializeResult(bool success)
             window->addWallet(BitcoinGUI::DEFAULT_WALLET, walletModel);
             window->setCurrentWallet(BitcoinGUI::DEFAULT_WALLET);
 
+#if defined(ENABLE_BIP70)
             connect(walletModel, SIGNAL(coinsSent(CWallet*,SendCoinsRecipient,QByteArray)),
                              paymentServer, SLOT(fetchPaymentACK(CWallet*,const SendCoinsRecipient&,QByteArray)));
+#endif
         }
 #endif
 
@@ -504,7 +512,7 @@ void BitcoinApplication::initializeResult(bool success)
         }
         Q_EMIT splashFinished(window);
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
         // Now that initialization/startup is done, process any command-line
         // bitcoin: URIs or payment requests:
         connect(paymentServer, SIGNAL(receivedPaymentRequest(SendCoinsRecipient)),
@@ -645,7 +653,7 @@ int main(int argc, char *argv[])
         QMessageBox::critical(0, QObject::tr(PACKAGE_NAME), QObject::tr("Error: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     // Parse URIs on command line -- this can affect Params()
     PaymentServer::ipcParseCommandLine(argc, argv);
 #endif
@@ -657,7 +665,7 @@ int main(int argc, char *argv[])
     // Re-initialize translations after changing application name (language in network-specific settings can be different)
     initTranslations(qtTranslatorBase, qtTranslator, translatorBase, translator);
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     /// 8. URI IPC sending
     // - Do this early as we don't want to bother initializing if we are just calling IPC
     // - Do this *after* setting up the data directory, as the data directory hash is used in the name
