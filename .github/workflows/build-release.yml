@@ -26,6 +26,7 @@ jobs:
             mingw-w64-x86_64-db
             mingw-w64-x86_64-qt5-base
             mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-qrencode
             mingw-w64-x86_64-protobuf
             autoconf
             automake
@@ -35,6 +36,8 @@ jobs:
       - name: Build Badcoin
         shell: msys2 {0}
         run: |
+          export PATH="/mingw64/bin:$PATH"
+          export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
           ./autogen.sh
           ./configure \
             --with-gui=qt5 \
@@ -43,7 +46,7 @@ jobs:
             --with-incompatible-bdb \
             --with-boost=/mingw64 \
             BOOST_LDFLAGS="-L/mingw64/lib" \
-            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include" \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/qt5" \
             CXXFLAGS="-O2" \
             LDFLAGS="-L/mingw64/lib" \
             --prefix=/mingw64
