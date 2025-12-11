@@ -8,6 +8,8 @@
 #include <qt/paymentrequestplus.h>
 #include <qt/walletmodeltransaction.h>
 
+#include <key.h>
+#include <script/standard.h>
 #include <support/allocators/secure.h>
 
 #include <map>
