@@ -90,12 +90,12 @@ jobs:
             --disable-bench \
             --with-incompatible-bdb \
             --with-boost=/mingw64 \
-            --with-qt-incdir=/mingw64/include/qt5 \
+            --with-qt-incdir=/mingw64/include \
             --with-qt-libdir=/mingw64/lib \
             --with-qt-bindir=/mingw64/bin \
             --with-qt-plugindir=/mingw64/share/qt5/plugins \
             BOOST_LDFLAGS="-L/mingw64/lib" \
-            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include/qt5 -I/mingw64/include/qt5/QtCore -I/mingw64/include/qt5/QtGui -I/mingw64/include/qt5/QtWidgets -I/mingw64/include/qt5/QtNetwork" \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
             CXXFLAGS="-O2" \
             LDFLAGS="-L/mingw64/lib" \
             --prefix=/mingw64
