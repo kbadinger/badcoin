@@ -95,19 +95,25 @@ jobs:
           QT_LIBS=$(pkg-config --libs Qt5Core Qt5Gui Qt5Widgets Qt5Network 2>/dev/null)
           echo "Qt libs from pkg-config: $QT_LIBS"
 
-          # Symlink Qt libs to help linker find them
-          echo "Creating symlinks for Qt libraries..."
+          # Symlink libs to help linker find them (static linker looks for .a, we have .dll.a)
+          echo "Creating symlinks for libraries..."
           cd /mingw64/lib
-          for lib in Qt5Core Qt5Gui Qt5Widgets Qt5Network Qt5DBus Qt5PrintSupport; do
+          for lib in Qt5Core Qt5Gui Qt5Widgets Qt5Network Qt5DBus Qt5PrintSupport qrencode protobuf; do
             if [ -f "lib${lib}.dll.a" ] && [ ! -f "lib${lib}.a" ]; then
               ln -sf "lib${lib}.dll.a" "lib${lib}.a"
               echo "Created symlink: lib${lib}.a -> lib${lib}.dll.a"
             fi
           done
-          if [ -f "libqrencode.dll.a" ] && [ ! -f "libqrencode.a" ]; then
-            ln -sf "libqrencode.dll.a" "libqrencode.a"
-            echo "Created symlink: libqrencode.a -> libqrencode.dll.a"
-          fi
+          # Symlink all abseil libs
+          for f in libabsl_*.dll.a; do
+            if [ -f "$f" ]; then
+              newname="${f%.dll.a}.a"
+              if [ ! -f "$newname" ]; then
+                ln -sf "$f" "$newname"
+              fi
+            fi
+          done
+          echo "Created abseil symlinks"
           cd -
 
           ./configure \
@@ -124,6 +130,7 @@ jobs:
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
             CXXFLAGS="-O2 -std=c++17" \
             LDFLAGS="-L/mingw64/lib" \
+            PROTOBUF_LIBS="$(pkg-config --libs protobuf 2>/dev/null || echo '-lprotobuf')" \
             --prefix=/mingw64
           make -j4
 
