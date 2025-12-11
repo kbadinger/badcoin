@@ -40,7 +40,7 @@ jobs:
         run: |
           ./autogen.sh
           ./configure \
-            --without-gui \
+            --with-gui=qt5 \
             --disable-tests \
             --disable-bench \
             --with-incompatible-bdb \
@@ -59,6 +59,7 @@ jobs:
           cp src/badcoind.exe release/
           cp src/badcoin-cli.exe release/
           cp src/badcoin-tx.exe release/
+          cp src/qt/badcoin-qt.exe release/
 
           # Copy required DLLs from all executables
           for exe in release/*.exe; do
@@ -71,9 +72,17 @@ jobs:
           cp /mingw64/bin/libdb-*.dll release/ 2>/dev/null || true
           cp /mingw64/bin/libdb_cxx-*.dll release/ 2>/dev/null || true
 
+          # Copy Qt5 plugins needed for GUI
+          mkdir -p release/platforms
+          cp /mingw64/share/qt5/plugins/platforms/qwindows.dll release/platforms/ 2>/dev/null || true
+
       - name: Create README for Windows users
         run: |
           echo "# Badcoin for Windows" > release/README.txt
+          echo "" >> release/README.txt
+          echo "## Quick Start (GUI)" >> release/README.txt
+          echo "" >> release/README.txt
+          echo "Double-click badcoin-qt.exe to launch the graphical wallet." >> release/README.txt
           echo "" >> release/README.txt
           echo "## Quick Start (Command Line)" >> release/README.txt
           echo "" >> release/README.txt
@@ -173,13 +182,15 @@ jobs:
             pkg-config libssl-dev libevent-dev bsdmainutils \
             libboost-system-dev libboost-filesystem-dev \
             libboost-program-options-dev libboost-thread-dev \
-            libboost-chrono-dev libdb5.3-dev libdb5.3++-dev
+            libboost-chrono-dev libdb5.3-dev libdb5.3++-dev \
+            libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools \
+            libqrencode-dev libprotobuf-dev protobuf-compiler
 
       - name: Build Badcoin
         run: |
           ./autogen.sh
           ./configure \
-            --without-gui \
+            --with-gui=qt5 \
             --disable-tests \
             --disable-bench \
             --with-incompatible-bdb \
@@ -192,6 +203,7 @@ jobs:
           cp src/badcoind release/
           cp src/badcoin-cli release/
           cp src/badcoin-tx release/
+          cp src/qt/badcoin-qt release/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
