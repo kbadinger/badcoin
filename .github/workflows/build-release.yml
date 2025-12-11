@@ -12,10 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          choco install -y python3 wget
-
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
