@@ -24,7 +24,8 @@ jobs:
             mingw-w64-x86_64-openssl
             mingw-w64-x86_64-libevent
             mingw-w64-x86_64-db
-            mingw-w64-x86_64-qt5
+            mingw-w64-x86_64-qt5-base
+            mingw-w64-x86_64-qt5-tools
             mingw-w64-x86_64-protobuf
             autoconf
             automake
