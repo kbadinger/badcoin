@@ -1,0 +1,36 @@
+/* Custom CSS for Badcoin BlockBook Explorer */
+
+/* Fix BADCOIN logo/text color - make it more visible */
+.logo-text,
+.navbar-brand,
+h1.navbar-brand {
+  color: #e74c3c !important; /* Bright red for visibility */
+  font-weight: bold !important;
+}
+
+/* Fix address text in Rich List - increase contrast */
+.rich-list table td a,
+.address-link,
+table.table td a {
+  color: #3498db !important; /* Bright blue for addresses */
+  font-weight: 500 !important;
+}
+
+/* Ensure address links are visible on hover */
+.rich-list table td a:hover,
+.address-link:hover,
+table.table td a:hover {
+  color: #2980b9 !important; /* Darker blue on hover */
+  text-decoration: underline !important;
+}
+
+/* Make table text more readable */
+table.table {
+  color: #ecf0f1 !important; /* Light text */
+}
+
+/* Additional contrast fixes */
+.card-body,
+.table-responsive {
+  background-color: rgba(52, 73, 94, 0.3) !important;
+}
