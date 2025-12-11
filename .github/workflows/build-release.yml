@@ -95,6 +95,21 @@ jobs:
           QT_LIBS=$(pkg-config --libs Qt5Core Qt5Gui Qt5Widgets Qt5Network 2>/dev/null)
           echo "Qt libs from pkg-config: $QT_LIBS"
 
+          # Symlink Qt libs to help linker find them
+          echo "Creating symlinks for Qt libraries..."
+          cd /mingw64/lib
+          for lib in Qt5Core Qt5Gui Qt5Widgets Qt5Network Qt5DBus Qt5PrintSupport; do
+            if [ -f "lib${lib}.dll.a" ] && [ ! -f "lib${lib}.a" ]; then
+              ln -sf "lib${lib}.dll.a" "lib${lib}.a"
+              echo "Created symlink: lib${lib}.a -> lib${lib}.dll.a"
+            fi
+          done
+          if [ -f "libqrencode.dll.a" ] && [ ! -f "libqrencode.a" ]; then
+            ln -sf "libqrencode.dll.a" "libqrencode.a"
+            echo "Created symlink: libqrencode.a -> libqrencode.dll.a"
+          fi
+          cd -
+
           ./configure \
             --with-gui=qt5 \
             --disable-tests \
@@ -109,8 +124,6 @@ jobs:
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
             CXXFLAGS="-O2 -std=c++17" \
             LDFLAGS="-L/mingw64/lib" \
-            QT_LIBS="-L/mingw64/lib -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lQt5DBus" \
-            QRENCODE_LIBS="-L/mingw64/lib -lqrencode" \
             --prefix=/mingw64
           make -j4
 
