@@ -96,7 +96,7 @@ jobs:
             --with-qt-plugindir=/mingw64/share/qt5/plugins \
             BOOST_LDFLAGS="-L/mingw64/lib" \
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
-            CXXFLAGS="-O2" \
+            CXXFLAGS="-O2 -std=c++17" \
             LDFLAGS="-L/mingw64/lib" \
             --prefix=/mingw64
           make -j4
