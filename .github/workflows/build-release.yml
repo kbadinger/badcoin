@@ -33,16 +33,55 @@ jobs:
             libtool
             pkg-config
 
+      - name: Debug Qt5 Installation
+        shell: msys2 {0}
+        run: |
+          echo "=== PKG_CONFIG_PATH ==="
+          echo $PKG_CONFIG_PATH
+          export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig:$PKG_CONFIG_PATH"
+          echo "After export: $PKG_CONFIG_PATH"
+
+          echo ""
+          echo "=== pkg-config location ==="
+          which pkg-config
+          pkg-config --version
+
+          echo ""
+          echo "=== Qt5 pkg-config files ==="
+          ls -la /mingw64/lib/pkgconfig/Qt5* 2>/dev/null || echo "No Qt5 .pc files found"
+
+          echo ""
+          echo "=== Qt5Core pkg-config test ==="
+          pkg-config --modversion Qt5Core && echo "SUCCESS" || echo "FAILED"
+          pkg-config --cflags Qt5Core 2>&1 || echo "cflags failed"
+          pkg-config --libs Qt5Core 2>&1 || echo "libs failed"
+
+          echo ""
+          echo "=== Qt5 include directory ==="
+          ls -la /mingw64/include/qt5/ 2>/dev/null | head -20 || echo "No qt5 include dir"
+
+          echo ""
+          echo "=== QtCore include directory ==="
+          ls -la /mingw64/include/qt5/QtCore/ 2>/dev/null | head -10 || echo "No QtCore include dir"
+
+          echo ""
+          echo "=== QtPlugin header location ==="
+          find /mingw64/include -name "QtPlugin" -o -name "qtplugin.h" 2>/dev/null || echo "QtPlugin not found"
+
+          echo ""
+          echo "=== Qt5 libraries ==="
+          ls -la /mingw64/lib/libQt5Core* 2>/dev/null || echo "No Qt5Core lib"
+
+          echo ""
+          echo "=== qmake location ==="
+          which qmake 2>/dev/null || echo "qmake not found"
+          qmake -v 2>/dev/null || echo "qmake version failed"
+
       - name: Build Badcoin
         shell: msys2 {0}
         run: |
           export PATH="/mingw64/bin:$PATH"
           export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig:$PKG_CONFIG_PATH"
-
-          # Debug: Check if Qt5 pkg-config files exist
-          echo "Checking Qt5 pkg-config..."
-          pkg-config --modversion Qt5Core || echo "Qt5Core not found via pkg-config"
-          ls -la /mingw64/lib/pkgconfig/Qt5* 2>/dev/null || echo "No Qt5 .pc files in lib/pkgconfig"
 
           ./autogen.sh
           ./configure \
@@ -56,7 +95,7 @@ jobs:
             --with-qt-bindir=/mingw64/bin \
             --with-qt-plugindir=/mingw64/share/qt5/plugins \
             BOOST_LDFLAGS="-L/mingw64/lib" \
-            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/qt5 -I/mingw64/include/qt5/QtCore -I/mingw64/include/qt5/QtGui -I/mingw64/include/qt5/QtWidgets -I/mingw64/include/qt5/QtNetwork" \
+            CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include/qt5 -I/mingw64/include/qt5/QtCore -I/mingw64/include/qt5/QtGui -I/mingw64/include/qt5/QtWidgets -I/mingw64/include/qt5/QtNetwork" \
             CXXFLAGS="-O2" \
             LDFLAGS="-L/mingw64/lib" \
             --prefix=/mingw64
