@@ -70,7 +70,12 @@ jobs:
 
           echo ""
           echo "=== Qt5 libraries ==="
-          ls -la /mingw64/lib/libQt5Core* 2>/dev/null || echo "No Qt5Core lib"
+          ls -la /mingw64/lib/libQt5* 2>/dev/null | head -20 || echo "No Qt5 libs"
+          ls -la /mingw64/lib/*Qt5* 2>/dev/null | head -20 || echo "No Qt5 libs (alt)"
+
+          echo ""
+          echo "=== qrencode library ==="
+          ls -la /mingw64/lib/*qrencode* 2>/dev/null || echo "No qrencode lib"
 
           echo ""
           echo "=== qmake location ==="
@@ -82,8 +87,14 @@ jobs:
         run: |
           export PATH="/mingw64/bin:$PATH"
           export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig:$PKG_CONFIG_PATH"
+          export LIBRARY_PATH="/mingw64/lib:$LIBRARY_PATH"
 
           ./autogen.sh
+
+          # Get Qt library flags from pkg-config
+          QT_LIBS=$(pkg-config --libs Qt5Core Qt5Gui Qt5Widgets Qt5Network 2>/dev/null)
+          echo "Qt libs from pkg-config: $QT_LIBS"
+
           ./configure \
             --with-gui=qt5 \
             --disable-tests \
@@ -98,6 +109,8 @@ jobs:
             CPPFLAGS="-DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mingw64/include -I/mingw64/include/QtCore -I/mingw64/include/QtGui -I/mingw64/include/QtWidgets -I/mingw64/include/QtNetwork" \
             CXXFLAGS="-O2 -std=c++17" \
             LDFLAGS="-L/mingw64/lib" \
+            QT_LIBS="-L/mingw64/lib -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lQt5DBus" \
+            QRENCODE_LIBS="-L/mingw64/lib -lqrencode" \
             --prefix=/mingw64
           make -j4
 
