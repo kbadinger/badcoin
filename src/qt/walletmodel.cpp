@@ -219,6 +219,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         if (rcp.fSubtractFeeFromAmount)
             fSubtractFeeFromAmount = true;
 
+#ifdef ENABLE_BIP70
         if (rcp.paymentRequest.IsInitialized())
         {   // PaymentRequest...
             CAmount subtotal = 0;
@@ -241,6 +242,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             total += subtotal;
         }
         else
+#endif
         {   // User-entered bitcoin address / amount:
             if(!validateAddress(rcp.address))
             {
