@@ -32,12 +32,6 @@ jobs:
             libtool
             pkg-config
 
-      - name: Update MSYS2 (skip problematic repos)
-        shell: msys2 {0}
-        run: |
-          # Disable clangarm64 repo (has signature issues and we don't need it)
-          sed -i '/\[clangarm64\]/,/^$/d' /etc/pacman.conf
-          pacman -Syu --noconfirm
 
       - name: Debug Qt5 Installation
         shell: msys2 {0}
