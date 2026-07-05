@@ -132,3 +132,10 @@ EXPLORER_TIMELINE.md
 WINDOWS_BUILD.md
 WINDOWS_QUICKSTART.md
 BACKUP_GUIDE.md
+
+# Secret carriers — never commit (added 2026-07-05 secrets remediation)
+.mcp.json
+.ticktick-token.json
+.token-oauth
+.env
+.env.*
